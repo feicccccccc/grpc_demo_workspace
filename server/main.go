@@ -1,14 +1,17 @@
 package main
 
 import (
-	"fmt"
 	"context"
-	"time"
+	"fmt"
+	"io"
 	"log"
 	"net"
-	
+	"time"
+	"unicode"
+
 	demo_grpc "grpc_server/proto"
-	"google.golang.org/grpc"  // go grpc package. `go get -u google.golang.org/grpc`
+
+	"google.golang.org/grpc" // go grpc package. `go get -u google.golang.org/grpc`
 )
 
 // The server strcut/object must implement the interface defined in the proto file
@@ -51,6 +54,45 @@ func (s *Server) StringToChar(in *demo_grpc.HelloRequest, stream demo_grpc.DemoS
 	}
 
 	return nil
+}
+
+// client side streaming
+func (s *Server) CharToString(stream demo_grpc.DemoService_CharToStringServer) error {
+	var str string
+	for {
+		msg, err := stream.Recv()
+		if err == io.EOF {
+			return stream.SendAndClose(&demo_grpc.HelloResponse{Message: str})
+		}
+
+		if err != nil {
+			return err
+		}
+		log.Printf("Received: %c", rune(msg.GetChar()))
+		str += string(rune(msg.GetChar()))
+	}
+}
+
+// bi-directional streaming
+func (s *Server) AllCharUpper(stream demo_grpc.DemoService_AllCharUpperServer) error {
+	for {
+		msg, err := stream.Recv()
+		if err == io.EOF {
+			return nil
+		}
+
+		if err != nil {
+			return err
+		}
+
+		log.Printf("Received: %c", rune(msg.GetChar()))
+
+		upperChar := unicode.ToUpper(rune(msg.GetChar()))
+
+		if err := stream.Send(&demo_grpc.CharResponse{Char: uint32(upperChar)}); err != nil {
+			return err
+		}
+	}
 }
 
 func main() {

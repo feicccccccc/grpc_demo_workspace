@@ -14,7 +14,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0f\x64\x65mo_grpc.proto\x12\ndemo_proto\"\x1c\n\x0cHelloRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\" \n\rHelloResponse\x12\x0f\n\x07message\x18\x01 \x01(\t\"\x1c\n\x0c\x43harResponse\x12\x0c\n\x04\x63har\x18\x01 \x01(\r\"$\n\x0c\x41\x64\x64\x65rRequest\x12\t\n\x01\x61\x18\x01 \x01(\x05\x12\t\n\x01\x62\x18\x02 \x01(\x05\"\x1f\n\rAdderResponse\x12\x0e\n\x06result\x18\x01 \x01(\x05\x32\xd8\x01\n\x0b\x44\x65moService\x12\x41\n\x08SayHello\x12\x18.demo_proto.HelloRequest\x1a\x19.demo_proto.HelloResponse\"\x00\x12\x46\n\x0cStringToChar\x12\x18.demo_proto.HelloRequest\x1a\x18.demo_proto.CharResponse\"\x00\x30\x01\x12>\n\x05\x41\x64\x64\x65r\x12\x18.demo_proto.AdderRequest\x1a\x19.demo_proto.AdderResponse\"\x00\x42\x12Z\x10proto/demo_protob\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0f\x64\x65mo_grpc.proto\x12\ndemo_proto\"\x1c\n\x0cHelloRequest\x12\x0c\n\x04name\x18\x01 \x01(\t\" \n\rHelloResponse\x12\x0f\n\x07message\x18\x01 \x01(\t\"\x1b\n\x0b\x43harRequest\x12\x0c\n\x04\x63har\x18\x01 \x01(\r\"\x1c\n\x0c\x43harResponse\x12\x0c\n\x04\x63har\x18\x01 \x01(\r\"$\n\x0c\x41\x64\x64\x65rRequest\x12\t\n\x01\x61\x18\x01 \x01(\x05\x12\t\n\x01\x62\x18\x02 \x01(\x05\"\x1f\n\rAdderResponse\x12\x0e\n\x06result\x18\x01 \x01(\x05\x32\xe9\x02\n\x0b\x44\x65moService\x12\x41\n\x08SayHello\x12\x18.demo_proto.HelloRequest\x1a\x19.demo_proto.HelloResponse\"\x00\x12\x46\n\x0cStringToChar\x12\x18.demo_proto.HelloRequest\x1a\x18.demo_proto.CharResponse\"\x00\x30\x01\x12>\n\x05\x41\x64\x64\x65r\x12\x18.demo_proto.AdderRequest\x1a\x19.demo_proto.AdderResponse\"\x00\x12\x46\n\x0c\x43harToString\x12\x17.demo_proto.CharRequest\x1a\x19.demo_proto.HelloResponse\"\x00(\x01\x12G\n\x0c\x41llCharUpper\x12\x17.demo_proto.CharRequest\x1a\x18.demo_proto.CharResponse\"\x00(\x01\x30\x01\x42\x12Z\x10proto/demo_protob\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -26,12 +26,14 @@ if _descriptor._USE_C_DESCRIPTORS == False:
   _globals['_HELLOREQUEST']._serialized_end=59
   _globals['_HELLORESPONSE']._serialized_start=61
   _globals['_HELLORESPONSE']._serialized_end=93
-  _globals['_CHARRESPONSE']._serialized_start=95
-  _globals['_CHARRESPONSE']._serialized_end=123
-  _globals['_ADDERREQUEST']._serialized_start=125
-  _globals['_ADDERREQUEST']._serialized_end=161
-  _globals['_ADDERRESPONSE']._serialized_start=163
-  _globals['_ADDERRESPONSE']._serialized_end=194
-  _globals['_DEMOSERVICE']._serialized_start=197
-  _globals['_DEMOSERVICE']._serialized_end=413
+  _globals['_CHARREQUEST']._serialized_start=95
+  _globals['_CHARREQUEST']._serialized_end=122
+  _globals['_CHARRESPONSE']._serialized_start=124
+  _globals['_CHARRESPONSE']._serialized_end=152
+  _globals['_ADDERREQUEST']._serialized_start=154
+  _globals['_ADDERREQUEST']._serialized_end=190
+  _globals['_ADDERRESPONSE']._serialized_start=192
+  _globals['_ADDERRESPONSE']._serialized_end=223
+  _globals['_DEMOSERVICE']._serialized_start=226
+  _globals['_DEMOSERVICE']._serialized_end=587
 # @@protoc_insertion_point(module_scope)

@@ -25,6 +25,8 @@ type DemoServiceClient interface {
 	SayHello(ctx context.Context, in *HelloRequest, opts ...grpc.CallOption) (*HelloResponse, error)
 	StringToChar(ctx context.Context, in *HelloRequest, opts ...grpc.CallOption) (DemoService_StringToCharClient, error)
 	Adder(ctx context.Context, in *AdderRequest, opts ...grpc.CallOption) (*AdderResponse, error)
+	CharToString(ctx context.Context, opts ...grpc.CallOption) (DemoService_CharToStringClient, error)
+	AllCharUpper(ctx context.Context, opts ...grpc.CallOption) (DemoService_AllCharUpperClient, error)
 }
 
 type demoServiceClient struct {
@@ -85,6 +87,71 @@ func (c *demoServiceClient) Adder(ctx context.Context, in *AdderRequest, opts ..
 	return out, nil
 }
 
+func (c *demoServiceClient) CharToString(ctx context.Context, opts ...grpc.CallOption) (DemoService_CharToStringClient, error) {
+	stream, err := c.cc.NewStream(ctx, &DemoService_ServiceDesc.Streams[1], "/demo_proto.DemoService/CharToString", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &demoServiceCharToStringClient{stream}
+	return x, nil
+}
+
+type DemoService_CharToStringClient interface {
+	Send(*CharRequest) error
+	CloseAndRecv() (*HelloResponse, error)
+	grpc.ClientStream
+}
+
+type demoServiceCharToStringClient struct {
+	grpc.ClientStream
+}
+
+func (x *demoServiceCharToStringClient) Send(m *CharRequest) error {
+	return x.ClientStream.SendMsg(m)
+}
+
+func (x *demoServiceCharToStringClient) CloseAndRecv() (*HelloResponse, error) {
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	m := new(HelloResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func (c *demoServiceClient) AllCharUpper(ctx context.Context, opts ...grpc.CallOption) (DemoService_AllCharUpperClient, error) {
+	stream, err := c.cc.NewStream(ctx, &DemoService_ServiceDesc.Streams[2], "/demo_proto.DemoService/AllCharUpper", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &demoServiceAllCharUpperClient{stream}
+	return x, nil
+}
+
+type DemoService_AllCharUpperClient interface {
+	Send(*CharRequest) error
+	Recv() (*CharResponse, error)
+	grpc.ClientStream
+}
+
+type demoServiceAllCharUpperClient struct {
+	grpc.ClientStream
+}
+
+func (x *demoServiceAllCharUpperClient) Send(m *CharRequest) error {
+	return x.ClientStream.SendMsg(m)
+}
+
+func (x *demoServiceAllCharUpperClient) Recv() (*CharResponse, error) {
+	m := new(CharResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // DemoServiceServer is the server API for DemoService service.
 // All implementations must embed UnimplementedDemoServiceServer
 // for forward compatibility
@@ -92,6 +159,8 @@ type DemoServiceServer interface {
 	SayHello(context.Context, *HelloRequest) (*HelloResponse, error)
 	StringToChar(*HelloRequest, DemoService_StringToCharServer) error
 	Adder(context.Context, *AdderRequest) (*AdderResponse, error)
+	CharToString(DemoService_CharToStringServer) error
+	AllCharUpper(DemoService_AllCharUpperServer) error
 	mustEmbedUnimplementedDemoServiceServer()
 }
 
@@ -107,6 +176,12 @@ func (UnimplementedDemoServiceServer) StringToChar(*HelloRequest, DemoService_St
 }
 func (UnimplementedDemoServiceServer) Adder(context.Context, *AdderRequest) (*AdderResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Adder not implemented")
+}
+func (UnimplementedDemoServiceServer) CharToString(DemoService_CharToStringServer) error {
+	return status.Errorf(codes.Unimplemented, "method CharToString not implemented")
+}
+func (UnimplementedDemoServiceServer) AllCharUpper(DemoService_AllCharUpperServer) error {
+	return status.Errorf(codes.Unimplemented, "method AllCharUpper not implemented")
 }
 func (UnimplementedDemoServiceServer) mustEmbedUnimplementedDemoServiceServer() {}
 
@@ -178,6 +253,58 @@ func _DemoService_Adder_Handler(srv interface{}, ctx context.Context, dec func(i
 	return interceptor(ctx, in, info, handler)
 }
 
+func _DemoService_CharToString_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(DemoServiceServer).CharToString(&demoServiceCharToStringServer{stream})
+}
+
+type DemoService_CharToStringServer interface {
+	SendAndClose(*HelloResponse) error
+	Recv() (*CharRequest, error)
+	grpc.ServerStream
+}
+
+type demoServiceCharToStringServer struct {
+	grpc.ServerStream
+}
+
+func (x *demoServiceCharToStringServer) SendAndClose(m *HelloResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func (x *demoServiceCharToStringServer) Recv() (*CharRequest, error) {
+	m := new(CharRequest)
+	if err := x.ServerStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func _DemoService_AllCharUpper_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(DemoServiceServer).AllCharUpper(&demoServiceAllCharUpperServer{stream})
+}
+
+type DemoService_AllCharUpperServer interface {
+	Send(*CharResponse) error
+	Recv() (*CharRequest, error)
+	grpc.ServerStream
+}
+
+type demoServiceAllCharUpperServer struct {
+	grpc.ServerStream
+}
+
+func (x *demoServiceAllCharUpperServer) Send(m *CharResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func (x *demoServiceAllCharUpperServer) Recv() (*CharRequest, error) {
+	m := new(CharRequest)
+	if err := x.ServerStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // DemoService_ServiceDesc is the grpc.ServiceDesc for DemoService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -199,6 +326,17 @@ var DemoService_ServiceDesc = grpc.ServiceDesc{
 			StreamName:    "StringToChar",
 			Handler:       _DemoService_StringToChar_Handler,
 			ServerStreams: true,
+		},
+		{
+			StreamName:    "CharToString",
+			Handler:       _DemoService_CharToString_Handler,
+			ClientStreams: true,
+		},
+		{
+			StreamName:    "AllCharUpper",
+			Handler:       _DemoService_AllCharUpper_Handler,
+			ServerStreams: true,
+			ClientStreams: true,
 		},
 	},
 	Metadata: "proto/demo_grpc.proto",

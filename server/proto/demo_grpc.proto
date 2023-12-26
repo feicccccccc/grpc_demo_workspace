@@ -23,6 +23,8 @@ service DemoService {
   rpc SayHello (HelloRequest) returns (HelloResponse) {}
   rpc StringToChar (HelloRequest) returns (stream CharResponse) {}
   rpc Adder (AdderRequest) returns (AdderResponse) {}
+  rpc CharToString (stream CharRequest) returns (HelloResponse) {}
+  rpc AllCharUpper (stream CharRequest) returns (stream CharResponse) {}
 }
 
 // the message types that will be used in the RPC methods
@@ -32,6 +34,10 @@ message HelloRequest {
 
 message HelloResponse {
   string message = 1;
+}
+
+message CharRequest {
+  uint32 char = 1;
 }
 
 message CharResponse {

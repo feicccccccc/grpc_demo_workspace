@@ -28,22 +28,40 @@ def run():
 
         # Make a gRPC request
         message = proto.demo_grpc_pb2.HelloRequest(name="Python")
-        response = stub.SayHello(message)
+        response: proto.demo_grpc_pb2.HelloResponse = stub.SayHello(message)
 
         # Process the response
-        print(response)  # Replace with your response handling logic
+        print(response.message)  # Replace with your response handling logic
 
         # Adder request
         message = proto.demo_grpc_pb2.AdderRequest(a=10, b=20)
-        response = stub.Adder(message)
+        response: proto.demo_grpc_pb2.AdderResponse = stub.Adder(message)
 
-        print(response)
+        print(response.result)
 
         # Server streaming
-        message = proto.demo_grpc_pb2.HelloRequest(name="Calling from python")
+        message = proto.demo_grpc_pb2.HelloRequest(name="Call")
         for char in stub.StringToChar(message):
             # char is type of proto.demo_grpc_pb2.CharResponse
             print(chr(char.char))
+
+        # request-side streaming
+        chars = ['p', 'y', 't', 'h', 'o', 'n']
+
+        # create a iterator of CharRequest
+        def msg_iter(chars):
+            for char in chars:
+                msg = proto.demo_grpc_pb2.CharRequest(char=ord(char))
+                yield msg
+
+        response: proto.demo_grpc_pb2.HelloResponse = stub.CharToString(msg_iter(chars))
+        print(response.message)
+
+        # bidirectional streaming
+        responses = stub.AllCharUpper(msg_iter(chars))
+        for response in responses:
+            response: proto.demo_grpc_pb2.CharResponse
+            print(chr(response.char))
 
 
 if __name__ == '__main__':

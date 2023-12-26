@@ -30,6 +30,16 @@ class DemoServiceStub(object):
                 request_serializer=demo__grpc__pb2.AdderRequest.SerializeToString,
                 response_deserializer=demo__grpc__pb2.AdderResponse.FromString,
                 )
+        self.CharToString = channel.stream_unary(
+                '/demo_proto.DemoService/CharToString',
+                request_serializer=demo__grpc__pb2.CharRequest.SerializeToString,
+                response_deserializer=demo__grpc__pb2.HelloResponse.FromString,
+                )
+        self.AllCharUpper = channel.stream_stream(
+                '/demo_proto.DemoService/AllCharUpper',
+                request_serializer=demo__grpc__pb2.CharRequest.SerializeToString,
+                response_deserializer=demo__grpc__pb2.CharResponse.FromString,
+                )
 
 
 class DemoServiceServicer(object):
@@ -54,6 +64,18 @@ class DemoServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def CharToString(self, request_iterator, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def AllCharUpper(self, request_iterator, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_DemoServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -71,6 +93,16 @@ def add_DemoServiceServicer_to_server(servicer, server):
                     servicer.Adder,
                     request_deserializer=demo__grpc__pb2.AdderRequest.FromString,
                     response_serializer=demo__grpc__pb2.AdderResponse.SerializeToString,
+            ),
+            'CharToString': grpc.stream_unary_rpc_method_handler(
+                    servicer.CharToString,
+                    request_deserializer=demo__grpc__pb2.CharRequest.FromString,
+                    response_serializer=demo__grpc__pb2.HelloResponse.SerializeToString,
+            ),
+            'AllCharUpper': grpc.stream_stream_rpc_method_handler(
+                    servicer.AllCharUpper,
+                    request_deserializer=demo__grpc__pb2.CharRequest.FromString,
+                    response_serializer=demo__grpc__pb2.CharResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -131,5 +163,39 @@ class DemoService(object):
         return grpc.experimental.unary_unary(request, target, '/demo_proto.DemoService/Adder',
             demo__grpc__pb2.AdderRequest.SerializeToString,
             demo__grpc__pb2.AdderResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def CharToString(request_iterator,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.stream_unary(request_iterator, target, '/demo_proto.DemoService/CharToString',
+            demo__grpc__pb2.CharRequest.SerializeToString,
+            demo__grpc__pb2.HelloResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+
+    @staticmethod
+    def AllCharUpper(request_iterator,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.stream_stream(request_iterator, target, '/demo_proto.DemoService/AllCharUpper',
+            demo__grpc__pb2.CharRequest.SerializeToString,
+            demo__grpc__pb2.CharResponse.FromString,
             options, channel_credentials,
             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
