@@ -16,6 +16,12 @@ class HelloResponse(_message.Message):
     message: str
     def __init__(self, message: _Optional[str] = ...) -> None: ...
 
+class CharResponse(_message.Message):
+    __slots__ = ("char",)
+    CHAR_FIELD_NUMBER: _ClassVar[int]
+    char: int
+    def __init__(self, char: _Optional[int] = ...) -> None: ...
+
 class AdderRequest(_message.Message):
     __slots__ = ("a", "b")
     A_FIELD_NUMBER: _ClassVar[int]
