@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"io"
 	"log"
 
 	demo_grpc "grpc_server/proto" // calling from the server proto package
@@ -38,4 +39,28 @@ func main() {
 		log.Fatalf("failed to call Adder: %v", err)
 	}
 	log.Printf("Adder Response: %v", res2.GetResult())
+
+	// StringToChar
+	req3 := demo_grpc.HelloRequest{Name: "send from GO"}
+
+	stream, err := client.StringToChar(context.Background(), &req3)
+	if err != nil {
+		log.Fatalf("failed to call StringToChar: %v", err)
+	}
+	
+	// forever loop
+	for {
+		msg, err := stream.Recv()
+
+		// end of stream
+		if err == io.EOF {
+			break
+		}
+
+		if err != nil {
+			log.Fatalf("failed to receive: %v", err)
+		}
+
+		log.Printf("StringToChar Response: %c", rune(msg.GetChar()))
+	}
 }

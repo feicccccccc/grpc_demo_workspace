@@ -27,16 +27,30 @@ It takes a context and a pointer to a HelloRequest object, and outputs a pointer
 Rest is implementation
 */
 
+// unary
 func (s *Server) SayHello(ctx context.Context, in *demo_grpc.HelloRequest) (*demo_grpc.HelloResponse, error) {
 	log.Printf("Received: %v", in.GetName())
 	return &demo_grpc.HelloResponse{Message: "Hello " + in.GetName()}, nil
 }
 
+// unary
 func (s *Server) Adder(ctx context.Context, in *demo_grpc.AdderRequest) (*demo_grpc.AdderResponse, error) {
 	log.Printf("Received: %v, %v", in.GetA(), in.GetB())
 	time.Sleep(2 * time.Second)
 
 	return &demo_grpc.AdderResponse{Result: in.GetA() + in.GetB()}, nil
+}
+
+// server side streaming 
+func (s *Server) StringToChar(in *demo_grpc.HelloRequest, stream demo_grpc.DemoService_StringToCharServer) error {
+	log.Printf("Received: %v", in.GetName())
+
+	for _, c := range in.GetName() {
+		stream.Send(&demo_grpc.CharResponse{Char: uint32(c)})
+		time.Sleep(1 * time.Second)
+	}
+
+	return nil
 }
 
 func main() {

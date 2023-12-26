@@ -23,6 +23,7 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type DemoServiceClient interface {
 	SayHello(ctx context.Context, in *HelloRequest, opts ...grpc.CallOption) (*HelloResponse, error)
+	StringToChar(ctx context.Context, in *HelloRequest, opts ...grpc.CallOption) (DemoService_StringToCharClient, error)
 	Adder(ctx context.Context, in *AdderRequest, opts ...grpc.CallOption) (*AdderResponse, error)
 }
 
@@ -43,6 +44,38 @@ func (c *demoServiceClient) SayHello(ctx context.Context, in *HelloRequest, opts
 	return out, nil
 }
 
+func (c *demoServiceClient) StringToChar(ctx context.Context, in *HelloRequest, opts ...grpc.CallOption) (DemoService_StringToCharClient, error) {
+	stream, err := c.cc.NewStream(ctx, &DemoService_ServiceDesc.Streams[0], "/demo_proto.DemoService/StringToChar", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &demoServiceStringToCharClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type DemoService_StringToCharClient interface {
+	Recv() (*CharResponse, error)
+	grpc.ClientStream
+}
+
+type demoServiceStringToCharClient struct {
+	grpc.ClientStream
+}
+
+func (x *demoServiceStringToCharClient) Recv() (*CharResponse, error) {
+	m := new(CharResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 func (c *demoServiceClient) Adder(ctx context.Context, in *AdderRequest, opts ...grpc.CallOption) (*AdderResponse, error) {
 	out := new(AdderResponse)
 	err := c.cc.Invoke(ctx, "/demo_proto.DemoService/Adder", in, out, opts...)
@@ -57,6 +90,7 @@ func (c *demoServiceClient) Adder(ctx context.Context, in *AdderRequest, opts ..
 // for forward compatibility
 type DemoServiceServer interface {
 	SayHello(context.Context, *HelloRequest) (*HelloResponse, error)
+	StringToChar(*HelloRequest, DemoService_StringToCharServer) error
 	Adder(context.Context, *AdderRequest) (*AdderResponse, error)
 	mustEmbedUnimplementedDemoServiceServer()
 }
@@ -67,6 +101,9 @@ type UnimplementedDemoServiceServer struct {
 
 func (UnimplementedDemoServiceServer) SayHello(context.Context, *HelloRequest) (*HelloResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SayHello not implemented")
+}
+func (UnimplementedDemoServiceServer) StringToChar(*HelloRequest, DemoService_StringToCharServer) error {
+	return status.Errorf(codes.Unimplemented, "method StringToChar not implemented")
 }
 func (UnimplementedDemoServiceServer) Adder(context.Context, *AdderRequest) (*AdderResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Adder not implemented")
@@ -100,6 +137,27 @@ func _DemoService_SayHello_Handler(srv interface{}, ctx context.Context, dec fun
 		return srv.(DemoServiceServer).SayHello(ctx, req.(*HelloRequest))
 	}
 	return interceptor(ctx, in, info, handler)
+}
+
+func _DemoService_StringToChar_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(HelloRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(DemoServiceServer).StringToChar(m, &demoServiceStringToCharServer{stream})
+}
+
+type DemoService_StringToCharServer interface {
+	Send(*CharResponse) error
+	grpc.ServerStream
+}
+
+type demoServiceStringToCharServer struct {
+	grpc.ServerStream
+}
+
+func (x *demoServiceStringToCharServer) Send(m *CharResponse) error {
+	return x.ServerStream.SendMsg(m)
 }
 
 func _DemoService_Adder_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -136,6 +194,12 @@ var DemoService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _DemoService_Adder_Handler,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "StringToChar",
+			Handler:       _DemoService_StringToChar_Handler,
+			ServerStreams: true,
+		},
+	},
 	Metadata: "proto/demo_grpc.proto",
 }
