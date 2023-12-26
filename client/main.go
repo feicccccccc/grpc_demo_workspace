@@ -1,17 +1,19 @@
 package main
 
 import (
-	"fmt"
 	"context"
+	"fmt"
 	"log"
 
-	demo_grpc "grpc_server/proto"  // calling from the server proto package
+	demo_grpc "grpc_server/proto" // calling from the server proto package
+
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 func main() {
 	fmt.Println("Running client/main.go")
-	conn, err := grpc.Dial("localhost:10000", grpc.WithInsecure())
+	conn, err := grpc.Dial("localhost:10000", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatalf("failed to dial: %v", err)
 	}
