@@ -1,0 +1,43 @@
+/* Create gRPC service
+protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative proto/demo_grpc.proto
+
+--go_out=. : generate go code in the current directory
+--go_opt=paths=source_relative : generate go code with import paths relative to the proto source directory
+--go-grpc_out=. : generate go code for gRPC in the current directory
+--go-grpc_opt=paths=source_relative : generate go code for gRPC with import paths relative to the proto source directory
+
+demo_grpc_grpc.pb.go: The generated gRPC code for the service
+demo_grpc.pb.go: The generated code for the message types
+*/
+
+syntax = "proto3";
+
+// namespace. Prevent mutliple proto files from having the same name
+package demo_proto;
+
+// what will the generated go module be called
+option go_package = "proto/demo_proto";
+
+// what RPC methods will this service have
+service DemoService {
+  rpc SayHello (HelloRequest) returns (HelloResponse) {}
+  rpc Adder (AdderRequest) returns (AdderResponse) {}
+}
+
+// the message types that will be used in the RPC methods
+message HelloRequest {
+  string name = 1;
+}
+
+message HelloResponse {
+  string message = 1;
+}
+
+message AdderRequest {
+  int32 a = 1;
+  int32 b = 2;
+}
+
+message AdderResponse {
+  int32 result = 1;
+}
