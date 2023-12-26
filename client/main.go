@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"sync"
+	"time"
 
 	demo_grpc "grpc_server/proto" // calling from the server proto package
 
@@ -41,7 +43,7 @@ func main() {
 	log.Printf("Adder Response: %v", res2.GetResult())
 
 	// StringToChar
-	req3 := demo_grpc.HelloRequest{Name: "send from GO"}
+	req3 := demo_grpc.HelloRequest{Name: "send"}
 
 	stream, err := client.StringToChar(context.Background(), &req3)
 	if err != nil {
@@ -63,4 +65,63 @@ func main() {
 
 		log.Printf("StringToChar Response: %c", rune(msg.GetChar()))
 	}
+
+	// CharToString
+	chars := []uint32{'g', 'R', 'P', 'C'}
+
+	stream2, err := client.CharToString(context.Background())
+	if err != nil {
+		log.Fatalf("failed to call CharToString: %v", err)
+	}
+
+	for _, c := range chars {
+		log.Printf("Sent: %c", rune(c))
+		time.Sleep(500 * time.Millisecond)
+		if err := stream2.Send(&demo_grpc.CharRequest{Char: c}); err != nil {
+			log.Fatalf("failed to send: %v", err)
+		}
+	}
+
+	res3, err := stream2.CloseAndRecv()
+	if err != nil {
+		log.Fatalf("failed to receive: %v", err)
+	}
+	log.Printf("CharToString Response: %v", res3)
+
+	// AllCharUpper
+	chars2 := []uint32{'l', 'o', 'w', 'e', 'r'}
+	stream3, err := client.AllCharUpper(context.Background())
+	if err != nil {
+		log.Fatalf("failed to call AllCharUpper: %v", err)
+	}
+
+	// Force the goroutine to wait for the server to finish sending data
+	var wg sync.WaitGroup
+
+	// a new goroutine to recieved data from the server
+	wg.Add(1) // add 1 to wg
+	go func() {
+		for {
+			in, err := stream3.Recv()
+			if err == io.EOF {
+				wg.Done()  // signal wg that we are done
+				return
+			}
+			if err != nil {
+				log.Fatalf("failed to receive: %v", err)
+			}
+			log.Printf("AllCharUpper Response: %c", rune(in.GetChar()))
+		}
+	}()
+	
+	// send data to the server
+	for _, c := range chars2 {
+		log.Printf("Sent: %c", rune(c))
+		time.Sleep(200 * time.Millisecond)
+		if err := stream3.Send(&demo_grpc.CharRequest{Char: c}); err != nil {
+			log.Fatalf("failed to send: %v", err)
+		}
+	}
+	stream3.CloseSend()  // trigger EOF
+	wg.Wait()  // wait till goroutine is done
 }
